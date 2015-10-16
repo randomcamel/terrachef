@@ -9,6 +9,9 @@ class TerraformExecute < Chef::Resource
 
   resource_name :terraform_execute
 
+  # hack: these different actions should be exposed usefully to the user.
+  tf_args = ENV['TERRACHEF_NOOP'] ? "plan" : "apply"
+
   action :execute do
 
     # may need to do some cwd footwork here, for usability.
@@ -19,7 +22,7 @@ class TerraformExecute < Chef::Resource
     end
 
     execute "Terraform block '#{name}'" do
-      command "terraform plan"
+      command "terraform #{tf_args}"
       cwd "/tmp"
     end
   end

@@ -14,7 +14,7 @@ terraform "my-terraform-block" do
   end
 
   docker_container "foo" do
-    image "ubuntu:latest"
+    image "ubuntu"
     name "running_container_name"
   end
 

@@ -1,10 +1,12 @@
 # terrachef
 Write any Terraform configuration using stuff indistinguishable from Chef resources.
 
+_(This was a Hack Day project, so at the moment it works more in principle than in practice. The gaps are more about me learning to use Terraform and applying that knowledge here; the part where Chef-like recipe gets turned into Terraform JSON is pretty solid.)_
+
 ## Future Ideas
 
 - [ ] Better/any `.tfstate` management.
-- [ ] Allow user to specify `:plan` vs. `:execute` and maybe make that useful.
+- [ ] Allow user to specify `:plan` vs. `:execute` and maybe make that useful. (As a temporary hack, setting the `TERRACHEF_NOOP` environment variable with run `terraform plan` instead of `terraform apply`.)
 - [ ] Integration testing (e.g. actually running the `terraform_execute` resource).
 
 ## Example
@@ -43,10 +45,6 @@ This gets compiled and run using Terraform's JSON format (which has feature pari
     "docker": {
       "host": "tcp://192.168.59.103:2376",
       "cert_path": "/Users/cdoherty/.boot2docker/certs/boot2docker-vm"
-    },
-    "aws": {
-      "aws_secret": "some-secret",
-      "aws_key": "some-key"
     }
   },
   "resource": {
@@ -75,7 +73,7 @@ Recipe: @recipe_files::/Users/cdoherty/repos/terrachef/recipe.rb
   * terraform_execute[my-terraform-block] action execute
     * file[/tmp/my-terraform-block.tf.json] action create (up to date)
     * execute[Terraform block 'my-terraform-block'] action run
-      - execute terraform plan
+      - execute terraform
 
   * log[after Terraform] action write
 
