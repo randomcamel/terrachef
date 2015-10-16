@@ -1,4 +1,4 @@
-require_relative "terraform"
+require_relative "lib/terraform"
 
 terraform {
   provider "docker" do

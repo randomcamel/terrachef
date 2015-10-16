@@ -1,0 +1,25 @@
+{
+  "providers": {
+    "docker": {
+      "host": "tcp://192.168.59.103:2376",
+      "cert_path": "/Users/cdoherty/.boot2docker/certs/boot2docker-vm"
+    },
+    "aws": {
+      "aws_secret": "some-secret",
+      "aws_key": "some-key"
+    }
+  },
+  "resources": {
+    "docker_container": {
+      "foo": {
+        "image": "ubuntu:latest",
+        "name": "running_container_name"
+      }
+    },
+    "docker_image": {
+      "ubuntu": {
+        "name": "ubuntu:latest"
+      }
+    }
+  }
+}
