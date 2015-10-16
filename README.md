@@ -1,6 +1,12 @@
 # terrachef
 Write any Terraform configuration using stuff indistinguishable from Chef resources.
 
+## Future Ideas
+
+- [ ] Better/any `.tfstate` management.
+- [ ] Allow user to specify `:plan` vs. `:execute` and maybe make that useful.
+- [ ] Integration testing (e.g. actually running the `terraform_execute` resource).
+
 ## Example
 
 Terraform has its own DSL, but if you already know Chef, you should be able to use Chef!
