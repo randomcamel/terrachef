@@ -6,14 +6,19 @@ terraform {
     cert_path "/Users/cdoherty/.boot2docker/certs/boot2docker-vm"
   end
 
-  docker_container "foo" do
-    image "ubuntu:latest"
-    tf_name "foo"   # take this automatically from resource name.
+  provider "aws" do
+    aws_secret "some-secret"
+    aws_key    "some-key"
   end
 
-  # docker_image "ubuntu" do
-  #   name "ubuntu:latest"
-  # end
+  docker_container "foo" do
+    image "ubuntu:latest"
+    name "running_container_name"
+  end
+
+  docker_image "ubuntu" do
+    name "ubuntu:latest"
+  end
 }
 
 =begin
