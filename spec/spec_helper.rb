@@ -1,4 +1,4 @@
-require 'terraform'
+require 'terrachef'
 
 RSpec.configure do |config|
   config.filter_run focus: true
