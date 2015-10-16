@@ -14,7 +14,7 @@ describe TerraformCompile do
   context "converting pseudo-Chef to Terraform data" do
     context "attributes" do
       it "converts an attributes block to a hash" do
-        expected = { "foo" => 23, "blargh" => "a string" }
+        expected = { :foo => 23, :blargh => "a string" }
         actual = TerraformAttributes.new do
           foo 42
           blargh "a string"

@@ -47,14 +47,14 @@ class TerraformAttributes
     instance_eval(&attributes_block)
   end
 
-  # use *value and value.join("")?
   def method_missing(name, value)
-    @attr_kv_pairs.merge!({ name.to_s => value })
+    @attr_kv_pairs.merge!({ name => value })
   end
 end
 
 class TerraformCompile
-  attr_accessor :tf_data, :providers, :resources, :outputs, :variables
+  # these are to avoid #instance_variable_get, which just looks gross.
+  attr_reader :providers, :resources, :outputs, :variables
 
   def initialize(&full_tf_block)
     @providers = {}   # keyed by provider name.
@@ -98,11 +98,12 @@ class TerraformCompile
 
   def to_tf_data
     result = {}
+
+    # tf uses the singular, we use the plural. luckily: Ruby!
     %w(provider resource variable output).each do |tf_type|
       data = self.send("#{tf_type}s".to_sym)
-      if data.size > 0
-        result.merge!(tf_type => data)
-      end
+
+      result.merge!(tf_type => data) if data.size > 0
     end
 
     result.merge!(atlas: @atlas) if @atlas
@@ -119,7 +120,6 @@ def terraform(faux_resource_name, &full_tf_block)
   # compile the block into a JSON blob.
   parsed = TerraformCompile.new(&full_tf_block)
   blob = parsed.to_tf_json
-  # puts blob
 
   # create a terraform_execute resource with the JSON blob.
   terraform_execute faux_resource_name do
