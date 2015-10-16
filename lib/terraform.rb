@@ -23,7 +23,7 @@ class TerraformAttributes
 
   # use *value and value.join("")?
   def method_missing(name, value)
-    @attr_kv_pairs.merge!({ name => value })
+    @attr_kv_pairs.merge!({ name.to_s => value })
   end
 end
 
@@ -52,12 +52,12 @@ class TerraformCompile
     attr_kv_pairs = TerraformAttributes.new(&attr_block).attr_kv_pairs
     resource_options.merge!(attr_kv_pairs)
 
-    (@resources[tf_resource_type] ||= {})[resource_name] = resource_options
+    (@resources[tf_resource_type.to_s] ||= {})[resource_name] = resource_options
   end
 
 
   def to_tf_data
-    { :providers => @providers, :resources => @resources }
+    { "providers" => @providers, "resources" => @resources }
   end
 
   def to_tf_json
