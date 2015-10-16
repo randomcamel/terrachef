@@ -27,7 +27,7 @@ describe TerraformCompile do
 
     context "full TF blocks" do
       it "parses my own TF recipe into TF data" do
-        actual = TerraformCompile.new do
+        actual = JSON.parse(TerraformCompile.new do
           provider "docker" do
             host "tcp://192.168.59.103:2376"
             cert_path "/Users/cdoherty/.boot2docker/certs/boot2docker-vm"
@@ -46,14 +46,13 @@ describe TerraformCompile do
           docker_image "ubuntu" do
             name "ubuntu:latest"
           end
-        end.to_tf_data
+        end.to_tf_json)
 
         expect(actual).to eq(my_tf_data)
       end
 
       it "parses a TF recipe into TF's sample data" do
-        skip "Not ready yet"
-        actual = TerraformCompile.new do
+        actual = JSON.parse(TerraformCompile.new do
           provider "aws" do
             access_key "foo"
             secret_key "bar"
@@ -62,7 +61,44 @@ describe TerraformCompile do
           provider "do" do
             api_key "${var.foo}"
           end
-        end.to_tf_data
+
+          variable "foo" do
+            default "bar"
+            description "bar"
+          end
+
+          aws_instance "db" do
+            security_groups ["${aws_security_group.firewall.*.id}"]
+            VPC "foo"
+            depends_on ["aws_instance.web"]
+            provisioner [{ file: {source: "foo", destination: "bar"} }]
+          end
+
+          aws_instance "web" do
+            ami "${var.foo}"
+            security_groups [
+                    "foo",
+                    "${aws_security_group.firewall.foo}"
+                ]
+            network_interface(device_index: 0,
+                              description: "Main network interface")
+            provisioner(
+                    file: {
+                        source: "foo",
+                        destination: "bar"
+                    }
+                )
+          end
+
+          aws_security_group "firewall" do
+            count 5
+          end
+
+          output "web_ip" do
+            value "${aws_instance.web.private_ip}"
+          end
+          # atlas "mitchellh/foo"
+        end.to_tf_json)
 
         expect(actual).to eq(basic_tf_data)
       end

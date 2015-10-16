@@ -28,19 +28,32 @@ class TerraformAttributes
 end
 
 class TerraformCompile
-  attr_accessor :attribute_parser, :tf_data
+  attr_accessor :tf_data, :providers, :resources, :outputs, :variables
 
   def initialize(&full_tf_block)
     @providers = {}   # keyed by provider name.
     @resources = {}   # keyed by resource name (TF seems to do ordering via `depends_on`).
+    @variables = {}
+    @outputs   = {}
 
     instance_eval(&full_tf_block)
   end
 
-  def provider(provider_name, &provider_options_block)
-    options = TerraformAttributes.new(&provider_options_block).attr_kv_pairs
+  def atlas(atlas_user)
+    @atlas = atlas_user
+  end
 
+  def provider(provider_name, &options_block)
+    options = TerraformAttributes.new(&options_block).attr_kv_pairs
     @providers[provider_name] = options
+  end
+
+  def variable(variable_name, &options_block)
+    @variables[variable_name] = TerraformAttributes.new(&options_block).attr_kv_pairs
+  end
+
+  def output(output_name, &options_block)
+    @outputs[output_name] = TerraformAttributes.new(&options_block).attr_kv_pairs
   end
 
   def method_missing(tf_resource_type, resource_name, &attr_block)
@@ -57,7 +70,16 @@ class TerraformCompile
 
 
   def to_tf_data
-    { "provider" => @providers, "resource" => @resources }
+    result = {}
+    %w(provider resource variable output).each do |tf_type|
+      data = self.send("#{tf_type}s".to_sym)
+      if data.size > 0
+        result.merge!(tf_type => data)
+      end
+    end
+
+    result.merge!(atlas: @atlas) if @atlas
+    result
   end
 
   def to_tf_json
