@@ -1,10 +1,10 @@
 require_relative "terraform"
 
 terraform {
-  # provider "docker" do
-  #   host "tcp://192.168.59.103:2376"
-  #   cert_path "/Users/cdoherty/.boot2docker/certs/boot2docker-vm"
-  # end
+  provider "docker" do
+    host "tcp://192.168.59.103:2376"
+    cert_path "/Users/cdoherty/.boot2docker/certs/boot2docker-vm"
+  end
 
   docker_container "foo" do
     image "ubuntu:latest"
