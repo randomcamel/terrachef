@@ -7,20 +7,23 @@ require 'pry'
 
 # this is only a separate class because its #method_missing behaves differently.
 class TerraformAttributes
-  # use *value and value.join("")?
-  def method_missing(name, value)
-    @attr_kv_pairs.merge!({ name => value })
-  end
+
+  attr_reader :attr_kv_pairs
 
   # given a block of stuff like this:
   # 
   # an_attribute "some value"
   # 
   # return a hash of { :an_attribute => "some value" }
-  def compile_attribute_block(&block)
+  def initialize(&attributes_block)
+    # raise ArgumentError("Must pass a block to TerraformAttributes") unless attributes_block
     @attr_kv_pairs = {}
-    instance_eval(&block)
-    @attr_kv_pairs
+    instance_eval(&attributes_block)
+  end
+
+  # use *value and value.join("")?
+  def method_missing(name, value)
+    @attr_kv_pairs.merge!({ name => value })
   end
 end
 
@@ -28,8 +31,6 @@ class TerraformCompile
   attr_accessor :attribute_parser, :tf_data
 
   def initialize(&full_tf_block)
-    @attribute_parser = TerraformAttributes.new
-
     @providers = {}   # keyed by provider name.
     @resources = {}   # keyed by resource name (TF seems to do ordering via `depends_on`).
 
@@ -37,7 +38,7 @@ class TerraformCompile
   end
 
   def provider(provider_name, &provider_options_block)
-    options = attribute_parser.compile_attribute_block(&provider_options_block)
+    options = TerraformAttributes.new(&provider_options_block).attr_kv_pairs
 
     @providers[provider_name] = options
   end
@@ -48,7 +49,7 @@ class TerraformCompile
     resource_options = {}
 
     # eval the attributes in a different class.
-    attr_kv_pairs = attribute_parser.compile_attribute_block(&attr_block)
+    attr_kv_pairs = TerraformAttributes.new(&attr_block).attr_kv_pairs
     resource_options.merge!(attr_kv_pairs)
 
     (@resources[tf_resource_type] ||= {})[resource_name] = resource_options
