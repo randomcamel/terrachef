@@ -6,8 +6,9 @@ _(This was a Hack Day project, so at the moment it works more in principle than 
 ## Future Ideas
 
 - [ ] Better/any `.tfstate` management.
-- [ ] Allow user to specify `:plan` vs. `:execute` and maybe make that useful. (As a temporary hack, setting the `TERRACHEF_NOOP` environment variable with run `terraform plan` instead of `terraform apply`.)
+- [ ] Allow user to specify `:plan` vs. `:apply` and maybe make that useful. (As a temporary hack, setting the `TERRACHEF_NOOP` environment variable with run `terraform plan` instead of `terraform apply`.)
 - [ ] Integration testing (e.g. actually running the `terraform_execute` resource).
+- [ ] Package up for consumption.
 
 ## Example
 
