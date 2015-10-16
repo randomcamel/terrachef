@@ -1,4 +1,4 @@
-require_relative "lib/terraform"
+require_relative "lib/terrachef"
 
 log "before Terraform"
 

@@ -1,8 +1,9 @@
 require 'json'
-require 'pry'
 
 require 'chef'
 
+class Chef
+class Resource
 class TerraformExecute < Chef::Resource
   property :json_blob, String, required: true
   # property state_file   # seems likely?
@@ -29,6 +30,8 @@ class TerraformExecute < Chef::Resource
 
   action :plan do
   end
+end
+end
 end
 
 # this is only a separate class because its #method_missing behaves differently.
