@@ -57,7 +57,7 @@ class TerraformCompile
 
 
   def to_tf_data
-    { "providers" => @providers, "resources" => @resources }
+    { "provider" => @providers, "resource" => @resources }
   end
 
   def to_tf_json

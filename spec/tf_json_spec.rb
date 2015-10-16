@@ -51,7 +51,21 @@ describe TerraformCompile do
         expect(actual).to eq(my_tf_data)
       end
 
-      it "parses a TF recipe into TF's sample data"
+      it "parses a TF recipe into TF's sample data" do
+        skip "Not ready yet"
+        actual = TerraformCompile.new do
+          provider "aws" do
+            access_key "foo"
+            secret_key "bar"
+          end
+
+          provider "do" do
+            api_key "${var.foo}"
+          end
+        end.to_tf_data
+
+        expect(actual).to eq(basic_tf_data)
+      end
     end
   end
 end
