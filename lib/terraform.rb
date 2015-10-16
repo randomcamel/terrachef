@@ -1,9 +1,33 @@
 require 'json'
 require 'pry'
 
-# class TerraformExecute < Chef::Resource
-#   property json_blob
-# end
+require 'chef'
+
+class TerraformExecute < Chef::Resource
+  property :json_blob, String, required: true
+  # property state_file   # seems likely?
+
+  resource_name :terraform_execute
+
+  action :execute do
+
+    # may need to do some cwd footwork here, for usability.
+    filename = name.gsub(/\s+/, '_') + ".tf.json"
+
+    file "/tmp/#{filename}" do
+      content json_blob
+    end
+
+    execute "Terraform block '#{name}'" do
+      command "terraform plan"
+      cwd "/tmp"
+    end
+  end
+
+  # YAGNI?
+  # action :plan do
+  # end
+end
 
 # this is only a separate class because its #method_missing behaves differently.
 class TerraformAttributes
@@ -87,13 +111,17 @@ class TerraformCompile
   end
 end
 
-def terraform(&full_tf_block)
+def terraform(faux_resource_name, &full_tf_block)
 
   # compile the block into a JSON blob.
   parsed = TerraformCompile.new(&full_tf_block)
-  puts parsed.to_tf_json
+  blob = parsed.to_tf_json
+  # puts blob
 
   # create a terraform_execute resource with the JSON blob.
+  terraform_execute faux_resource_name do
+    json_blob blob
+  end
 
   # that's it.
 end

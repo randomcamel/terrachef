@@ -1,6 +1,8 @@
 require_relative "lib/terraform"
 
-terraform {
+log "before Terraform"
+
+terraform "my-terraform-block" do
   provider "docker" do
     host "tcp://192.168.59.103:2376"
     cert_path "/Users/cdoherty/.boot2docker/certs/boot2docker-vm"
@@ -19,4 +21,6 @@ terraform {
   docker_image "ubuntu" do
     name "ubuntu:latest"
   end
-}
+end
+
+log "after Terraform"

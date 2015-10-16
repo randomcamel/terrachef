@@ -27,6 +27,10 @@ describe TerraformCompile do
 
     context "full TF blocks" do
       it "parses my own TF recipe into TF data" do
+        # it's much more natural to create our data structure with symbols, but then we have a deeply nested
+        # structure with a mix of string and hash keys, and JSON parsing only returns one or the other... by
+        # exporting and re-importing to/from JSON, we stringify all our keys, and the test is closer to real-
+        # life conditions.
         actual = JSON.parse(TerraformCompile.new do
           provider "docker" do
             host "tcp://192.168.59.103:2376"
