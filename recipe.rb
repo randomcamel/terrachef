@@ -8,7 +8,7 @@ terraform {
 
   docker_container "foo" do
     image "ubuntu:latest"
-    # name "foo"   # take this automatically from resource name.
+    tf_name "foo"   # take this automatically from resource name.
   end
 
   # docker_image "ubuntu" do
