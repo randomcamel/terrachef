@@ -101,7 +101,7 @@ describe TerraformCompile do
           output "web_ip" do
             value "${aws_instance.web.private_ip}"
           end
-          # atlas "mitchellh/foo"
+          atlas "chef/merp"
         end.to_tf_json)
 
         expect(actual).to eq(basic_tf_data)

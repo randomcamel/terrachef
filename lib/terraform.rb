@@ -12,7 +12,7 @@ class TerraformExecute < Chef::Resource
   # hack: these different actions should be exposed usefully to the user.
   tf_args = ENV['TERRACHEF_NOOP'] ? "plan" : "apply"
 
-  action :execute do
+  action :apply do
 
     # may need to do some cwd footwork here, for usability.
     filename = name.gsub(/\s+/, '_') + ".tf.json"
@@ -27,9 +27,8 @@ class TerraformExecute < Chef::Resource
     end
   end
 
-  # YAGNI?
-  # action :plan do
-  # end
+  action :plan do
+  end
 end
 
 # this is only a separate class because its #method_missing behaves differently.
@@ -67,7 +66,7 @@ class TerraformCompile
   end
 
   def atlas(atlas_user)
-    @atlas = atlas_user
+    @atlas = { :name => atlas_user }
   end
 
   def provider(provider_name, &options_block)
@@ -84,7 +83,8 @@ class TerraformCompile
   end
 
   def method_missing(tf_resource_type, resource_name, &attr_block)
-    # puts "#{tf_resource_type} --- #{resource_name} -- block_given?==#{block_given?}"
+
+    raise ArgumentError("Terraform resources require a block with options.") unless attr_block
 
     resource_options = {}
 
