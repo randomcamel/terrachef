@@ -27,11 +27,13 @@ end
 class TerraformCompile
   attr_accessor :attribute_parser, :tf_data
 
-  def initialize
+  def initialize(&full_tf_block)
     @attribute_parser = TerraformAttributes.new
 
     @providers = {}   # keyed by provider name.
     @resources = {}   # keyed by resource name (TF seems to do ordering via `depends_on`).
+
+    instance_eval(&full_tf_block)
   end
 
   def provider(provider_name, &provider_options_block)
@@ -52,18 +54,21 @@ class TerraformCompile
     (@resources[tf_resource_type] ||= {})[resource_name] = resource_options
   end
 
-  def compile_tf_block(&full_tf_block)
-    instance_eval(&full_tf_block)
+
+  def to_tf_data
     { :providers => @providers, :resources => @resources }
+  end
+
+  def to_tf_json
+    JSON.pretty_generate(self.to_tf_data)
   end
 end
 
-def terraform(&block)
-  result = TerraformCompile.new.compile_tf_block(&block)
-
-  puts JSON.pretty_generate(result)
+def terraform(&full_tf_block)
 
   # compile the block into a JSON blob.
+  parsed = TerraformCompile.new(&full_tf_block)
+  puts parsed.to_tf_json
 
   # create a terraform_execute resource with the JSON blob.
 
