@@ -10,25 +10,41 @@ class TerraformExecute < Chef::Resource
 
   resource_name :terraform_execute
 
-  # hack: these different actions should be exposed usefully to the user.
-  tf_args = ENV['TERRACHEF_NOOP'] ? "plan" : "apply"
+  action :plan do
+    # ----- dunno how to factor this out... -----
+    # may need to do some cwd footwork here, for usability.
+    tmpdir = "/tmp"
+    filename = name.gsub(/\s+/, '_') + ".tf.json"
+    json_path = ::File.join(tmpdir, filename)
+
+    file json_path do
+      content json_blob
+    end
+    # --------------------------------------------
+
+    execute "Terraform block '#{name}'" do
+      command "terraform plan"
+      cwd "/tmp"
+    end
+
+    log "Terraform files can be found in /tmp"
+  end
 
   action :apply do
 
+    # ----- dunno how to factor this out... -----
     # may need to do some cwd footwork here, for usability.
     filename = name.gsub(/\s+/, '_') + ".tf.json"
 
     file "/tmp/#{filename}" do
       content json_blob
     end
+    # --------------------------------------------
 
     execute "Terraform block '#{name}'" do
-      command "terraform #{tf_args}"
+      command "terraform apply"
       cwd "/tmp"
     end
-  end
-
-  action :plan do
   end
 end
 end
@@ -59,8 +75,6 @@ class TerraformCompile
   # these are to avoid #instance_variable_get, which just looks gross.
   attr_reader :providers, :resources, :outputs, :variables
 
-  attr_accessor :actions
-
   def initialize(&full_tf_block)
     @providers = {}   # keyed by provider name.
     @resources = {}   # keyed by resource name (TF seems to do ordering via `depends_on`).
@@ -69,6 +83,14 @@ class TerraformCompile
     @actions   = []
 
     instance_eval(&full_tf_block)
+  end
+
+  def action(action_list=nil)
+    if action_list
+      @actions = [action_list].flatten
+    else
+      @actions
+    end
   end
 
   def atlas(atlas_user)
@@ -127,12 +149,15 @@ def terraform(faux_resource_name, &full_tf_block)
   # compile the block into a JSON blob.
   parsed = TerraformCompile.new(&full_tf_block)
 
-  puts parsed.actions
+  puts parsed.action.inspect
   blob = parsed.to_tf_json
 
-  # create a terraform_execute resource with the JSON blob.
-  terraform_execute faux_resource_name do
-    json_blob blob
+  parsed.action.each do |tf_action|
+    # create a terraform_execute resource with the JSON blob.
+    terraform_execute faux_resource_name do
+      action tf_action
+      json_blob blob
+    end
   end
 
   # that's it.
