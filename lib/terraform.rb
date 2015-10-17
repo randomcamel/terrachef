@@ -45,7 +45,7 @@ class TerraformAttributes
   # 
   # return a hash of { :an_attribute => "some value" }
   def initialize(&attributes_block)
-    # raise ArgumentError("Must pass a block to TerraformAttributes") unless attributes_block
+    raise ArgumentError("Must pass a block to TerraformAttributes") unless attributes_block
     @attr_kv_pairs = {}
     instance_eval(&attributes_block)
   end
@@ -59,11 +59,14 @@ class TerraformCompile
   # these are to avoid #instance_variable_get, which just looks gross.
   attr_reader :providers, :resources, :outputs, :variables
 
+  attr_accessor :actions
+
   def initialize(&full_tf_block)
     @providers = {}   # keyed by provider name.
     @resources = {}   # keyed by resource name (TF seems to do ordering via `depends_on`).
     @variables = {}
     @outputs   = {}
+    @actions   = []
 
     instance_eval(&full_tf_block)
   end
@@ -118,10 +121,13 @@ class TerraformCompile
   end
 end
 
+# it seems likely there's a cleaner way to do this than having a global method.
 def terraform(faux_resource_name, &full_tf_block)
 
   # compile the block into a JSON blob.
   parsed = TerraformCompile.new(&full_tf_block)
+
+  puts parsed.actions
   blob = parsed.to_tf_json
 
   # create a terraform_execute resource with the JSON blob.
