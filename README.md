@@ -10,8 +10,8 @@ _(This was a Hack Day project, so at the moment it works more in principle than 
 - [x] Allow user to specify `:plan` vs. `:apply` and maybe make that useful. <strike>(As a temporary hack, setting the `TERRACHEF_NOOP` environment variable with run `terraform plan` instead of `terraform apply`.)</strike>
 - [ ] Integration testing (e.g. actually running the `terraform_execute` resource).
 - [ ] Package up for consumption.
-- [ ] Full and tested `provisioner` support.
-- [ ] Full and tested `module` support.
+- [x] Full and tested top-level `provisioner` support.
+- [ ] Full and tested top-level `module` support.
 - [ ] More `terraform` subcommands as resource actions.
 
 ## Example
@@ -130,6 +130,16 @@ provider "aws" do
 
   aws_security_group "firewall" do
     count 5
+  end
+
+  provisioner "file" do
+      source "conf/myapp.conf"
+      destination "C:/App/myapp.conf"
+      connection(
+          type: "winrm",
+          user: "Administrator",
+          password: "${var.admin_password}"
+      )
   end
 
   output "web_ip" do

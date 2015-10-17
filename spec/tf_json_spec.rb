@@ -101,6 +101,17 @@ describe TerraformCompile do
           output "web_ip" do
             value "${aws_instance.web.private_ip}"
           end
+
+          provisioner "file" do
+              source "conf/myapp.conf"
+              destination "C:/App/myapp.conf"
+              connection(
+                  type: "winrm",
+                  user: "Administrator",
+                  password: "${var.admin_password}",
+              )
+          end
+
           atlas "chef/merp"
         end.to_tf_json)
 
