@@ -1,14 +1,18 @@
 # terrachef
-Write any Terraform configuration using stuff indistinguishable from Chef resources.
+Write almost any Terraform configuration using code indistinguishable from Chef resources.
 
-_(This was a Hack Day project, so at the moment it works more in principle than in practice. The gaps are more about me learning to use Terraform and applying that knowledge here; the part where Chef-like recipe gets turned into Terraform JSON is pretty solid.)_
+_(This was a Hack Day project, so at the moment it works more in principle than in practice. The gaps are really about me learning to use Terraform and applying that knowledge here; the part where a Chef recipe gets turned into Terraform JSON is pretty solid.)_
+
 
 ## Future Ideas
 
 - [ ] Better/any `.tfstate` management.
-- [ ] Allow user to specify `:plan` vs. `:apply` and maybe make that useful. (As a temporary hack, setting the `TERRACHEF_NOOP` environment variable with run `terraform plan` instead of `terraform apply`.)
+- [x] Allow user to specify `:plan` vs. `:apply` and maybe make that useful. <strike>(As a temporary hack, setting the `TERRACHEF_NOOP` environment variable with run `terraform plan` instead of `terraform apply`.)</strike>
 - [ ] Integration testing (e.g. actually running the `terraform_execute` resource).
 - [ ] Package up for consumption.
+- [ ] Full and tested `provisioner` support.
+- [ ] Full and tested `module` support.
+- [ ] More `terraform` subcommands as resource actions.
 
 ## Example
 
