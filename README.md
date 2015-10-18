@@ -1,6 +1,8 @@
 # terrachef
 Write almost any Terraform configuration using code indistinguishable from Chef resources.
 
+This should support anything Terraform supports; it doesn't rely on an explicit list of Terraform functionality, so when Terraform adds something, you can use it via Terrachef.
+
 _(This was a Hack Day project, so at the moment it works more in principle than in practice. The gaps are really about me learning to use Terraform and applying that knowledge here; the part where a Chef recipe gets turned into Terraform JSON is pretty solid.)_
 
 

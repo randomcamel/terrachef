@@ -75,6 +75,12 @@
         }
       }
     },
+    "module": {
+      "consul": {
+        "source": "github.com/hashicorp/consul/terraform/aws",
+        "servers": 5
+      }
+    },
     "atlas": {
         "name": "chef/merp"
     }

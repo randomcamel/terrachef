@@ -112,6 +112,11 @@ describe TerraformCompile do
               )
           end
 
+          tf_module "consul" do
+            source "github.com/hashicorp/consul/terraform/aws"
+            servers 5
+          end
+
           atlas "chef/merp"
         end.to_tf_json)
 

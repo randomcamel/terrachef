@@ -74,7 +74,7 @@ end
 class TerraformCompile
   # these are to avoid #instance_variable_get, which just looks gross. note that these rely on the naming
   # convention of being "#{terraform_section_name}s".
-  attr_reader :providers, :resources, :outputs, :variables, :provisioners
+  attr_reader :providers, :resources, :outputs, :variables, :provisioners, :modules
 
   def initialize(&full_tf_block)
     @providers = {}   # keyed by provider name.
@@ -82,6 +82,8 @@ class TerraformCompile
     @variables = {}
     @outputs   = {}
     @provisioners = {}
+    @modules   = {}
+
     @actions   = []
 
     instance_eval(&full_tf_block)
@@ -99,6 +101,11 @@ class TerraformCompile
     @atlas = { :name => atlas_user }
   end
 
+  # ---------------------
+  # Top-level Terraform directives.
+  #
+  # These can be compressed into a case statement in #method_missing, but I'm not sure that really contributes
+  # to code clarity.
   def provider(provider_name, &options_block)
     @providers[provider_name] = TerraformAttributes.new(&options_block).attr_kv_pairs
   end
@@ -114,6 +121,11 @@ class TerraformCompile
   def provisioner(provisioner_name, &options_block)
     @provisioners[provisioner_name] = TerraformAttributes.new(&options_block).attr_kv_pairs
   end
+
+  def tf_module(module_name, &options_block)
+    @modules[module_name] = TerraformAttributes.new(&options_block).attr_kv_pairs
+  end
+  # ---------------------
 
   def method_missing(tf_resource_type, resource_name, &attr_block)
 
@@ -133,7 +145,7 @@ class TerraformCompile
     result = {}
 
     # tf uses the singular, we use the plural. luckily: Ruby!
-    %w(provider resource variable output provisioner).each do |tf_type|
+    %w(provider resource variable output provisioner module).each do |tf_type|
       data = self.send("#{tf_type}s".to_sym)
 
       result.merge!(tf_type => data) if data.size > 0
