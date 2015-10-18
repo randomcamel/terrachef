@@ -103,42 +103,27 @@ class TerraformCompile
     end
   end
 
-  def atlas(atlas_user)
-    @atlas = { :name => atlas_user }
-  end
-
   # ---------------------
-  # Top-level Terraform directives.
-  #
-  # These can be compressed into a case statement in #method_missing, but I'm not sure that really contributes
-  # to code clarity.
-  def provider(provider_name, &options_block)
-    @providers[provider_name] = TerraformAttributes.new(&options_block).attr_kv_pairs
-  end
-
-  def variable(variable_name, &options_block)
-    @variables[variable_name] = TerraformAttributes.new(&options_block).attr_kv_pairs
-  end
-
-  def output(output_name, &options_block)
-    @outputs[output_name] = TerraformAttributes.new(&options_block).attr_kv_pairs
-  end
-
-  def provisioner(provisioner_name, &options_block)
-    @provisioners[provisioner_name] = TerraformAttributes.new(&options_block).attr_kv_pairs
-  end
-
+  # Top-level Terraform directives that require non-generic handling.
   def tf_module(module_name, &options_block)
     @modules[module_name] = TerraformAttributes.new(&options_block).attr_kv_pairs
   end
+
+  def atlas(atlas_user)
+    @atlas = { :name => atlas_user }
+  end
   # ---------------------
+
+  def respond_to_missing?(method_name, include_private=false)
+    TF_TOP_LEVELS.include?(method_name.to_s) || super
+  end
 
   def method_missing(tf_resource_type, resource_name, &attr_block)
 
     raise ArgumentError("Terraform resources require a block with options.") unless attr_block
 
-    if TF_TOP_LEVELS.include?(tf_resource_type)
-      data = self.send( plural(tf_type) )[tf_resource_type]
+    if TF_TOP_LEVELS.include?(tf_resource_type.to_s)
+      data = self.send( plural(tf_resource_type) )
       data[resource_name] = TerraformAttributes.new(&attr_block).attr_kv_pairs
       return
     end
