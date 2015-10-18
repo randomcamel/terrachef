@@ -75,7 +75,7 @@ end
 # ------------------------------------------------------------------------
 class TerraformCompile
 
-  TF_TOP_LEVELS = %w(provider resource variable output provisioner module)
+  TF_TOP_LEVELS = [:provider, :resource, :variable, :output, :provisioner, :module]
 
   def self.plural(singular)
     "#{singular}s".to_sym
@@ -115,14 +115,14 @@ class TerraformCompile
   # ---------------------
 
   def respond_to_missing?(method_name, include_private=false)
-    TF_TOP_LEVELS.include?(method_name.to_s) || super
+    TF_TOP_LEVELS.include?(method_name) || super
   end
 
   def method_missing(tf_resource_type, resource_name, &attr_block)
 
     raise ArgumentError("Terraform resources require a block with options.") unless attr_block
 
-    if TF_TOP_LEVELS.include?(tf_resource_type.to_s)
+    if TF_TOP_LEVELS.include?(tf_resource_type)
       data = self.send( plural(tf_resource_type) )
       data[resource_name] = TerraformAttributes.new(&attr_block).attr_kv_pairs
       return
