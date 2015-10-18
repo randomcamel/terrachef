@@ -12,8 +12,8 @@ _(This was a Hack Day project, so at the moment it works more in principle than 
 - [x] Allow user to specify `:plan` vs. `:apply` and maybe make that useful. <strike>(As a temporary hack, setting the `TERRACHEF_NOOP` environment variable with run `terraform plan` instead of `terraform apply`.)</strike>
 - [ ] Integration testing (e.g. actually running the `terraform_execute` resource).
 - [ ] Package up for consumption.
-- [x] Full and tested top-level `provisioner` support.
-- [ ] Full and tested top-level `module` support.
+- [x] Full and unit-tested top-level `provisioner` support.
+- [x] Full and unit-tested top-level `module` support.
 - [ ] More `terraform` subcommands as resource actions.
 
 ## Example
@@ -23,7 +23,7 @@ Terraform has its own DSL, but if you already know Chef, you should be able to u
 **WARNING: You can use the normal Terraform directives everywhere, _EXCEPT_ for `module`: because `module` is a Ruby keyword, we use `tf_module` instead.**
 
 ```ruby
-require_relative "lib/terraform"
+require "terrachef"
 
 log "before Terraform"
 
