@@ -79,12 +79,7 @@ class TerraformCompile
   TF_TOP_LEVELS.each { |sym| attr_reader :"#{sym}s" }
 
   def initialize(&full_tf_block)
-    @providers = {}   # keyed by provider name.
-    @resources = {}   # keyed by resource name (TF seems to do ordering via `depends_on`).
-    @variables = {}
-    @outputs   = {}
-    @provisioners = {}
-    @modules   = {}
+    TF_TOP_LEVELS.each { |sym| instance_variable_set("@#{sym}s", {}) }
 
     @actions   = []
 
