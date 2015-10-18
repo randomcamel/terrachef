@@ -62,7 +62,7 @@ class TerraformAttributes
   # 
   # return a hash of { :an_attribute => "some value" }
   def initialize(&attributes_block)
-    raise ArgumentError("Must pass a block to TerraformAttributes") unless attributes_block
+    raise ArgumentError, "Must pass a block to TerraformAttributes" unless attributes_block
     @attr_kv_pairs = {}
     instance_eval(&attributes_block)
   end
@@ -95,25 +95,20 @@ class TerraformCompile
     instance_eval(&full_tf_block)
   end
 
-  def action(action_list=nil)
-    if action_list
-      @actions = [action_list].flatten
-    else
-      @actions
-    end
-  end
-
   # ---------------------
   # Top-level Terraform directives that require non-generic handling.
-  def tf_module(module_name, &options_block)
-    @modules[module_name] = TerraformAttributes.new(&options_block).attr_kv_pairs
-  end
+    # has to map `tf_module` onto `module`.
+    def tf_module(module_name, &options_block)
+      @modules[module_name] = TerraformAttributes.new(&options_block).attr_kv_pairs
+    end
 
-  def atlas(atlas_user)
-    @atlas = { :name => atlas_user }
-  end
+    # produces a different data structure
+    def atlas(atlas_user)
+      @atlas = { :name => atlas_user }
+    end
   # ---------------------
 
+  # https://robots.thoughtbot.com/always-define-respond-to-missing-when-overriding
   def respond_to_missing?(method_name, include_private=false)
     TF_TOP_LEVELS.include?(method_name) || super
   end
@@ -137,7 +132,6 @@ class TerraformCompile
     (@resources[tf_resource_type.to_s] ||= {})[resource_name] = resource_options
   end
 
-
   def to_tf_data
     result = {}
 
@@ -148,6 +142,7 @@ class TerraformCompile
       result.merge!(tf_type => data) if data.size > 0
     end
 
+    # we can eventually treat @atlas like we do everything else.
     result.merge!(atlas: @atlas) if @atlas
     result
   end
@@ -157,7 +152,8 @@ class TerraformCompile
   end
 end
 
-# it seems likely there's a cleaner way to do this than having a global method.
+# there's probably a cleaner way to do this than having a global method--maybe using the world's weirdest Chef
+# resource or something, or tacking it onto the client run.
 def terraform(faux_resource_name, &full_tf_block)
 
   # compile the block into a JSON blob.
