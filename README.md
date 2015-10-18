@@ -20,6 +20,8 @@ _(This was a Hack Day project, so at the moment it works more in principle than 
 
 Terraform has its own DSL, but if you already know Chef, you should be able to use Chef!
 
+**WARNING: You can use the normal Terraform directives everywhere, _EXCEPT_ for `module`: because `module` is a Ruby keyword, we use `tf_module` instead.**
+
 ```ruby
 require_relative "lib/terraform"
 
@@ -142,6 +144,12 @@ provider "aws" do
           user: "Administrator",
           password: "${var.admin_password}"
       )
+  end
+
+  # EXCEPTION: since "module" is a Ruby keyword, we have to use "tf_module" here.
+  tf_module "consul" do
+    source "github.com/hashicorp/consul/terraform/aws"
+    servers 5
   end
 
   output "web_ip" do

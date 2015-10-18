@@ -50,6 +50,7 @@ end
 end
 end
 
+# ------------------------------------------------------------------------
 # this is only a separate class because its #method_missing behaves differently.
 class TerraformAttributes
 
@@ -71,17 +72,25 @@ class TerraformAttributes
   end
 end
 
+# ------------------------------------------------------------------------
 class TerraformCompile
 
   TF_TOP_LEVELS = %w(provider resource variable output provisioner module)
 
+  def self.plural(singular)
+    "#{singular}s".to_sym
+  end
+  def plural(singular)
+    self.class.plural(singular)
+  end
+
   # these are to avoid #instance_variable_get, which just looks gross.
-  TF_TOP_LEVELS.each { |sym| attr_reader :"#{sym}s" }
+  TF_TOP_LEVELS.each { |sym| attr_accessor self.plural(sym) }
 
   def initialize(&full_tf_block)
-    TF_TOP_LEVELS.each { |sym| instance_variable_set("@#{sym}s", {}) }
+    TF_TOP_LEVELS.each { |sym| self.send( "#{plural(sym)}=", {} ) }
 
-    @actions   = []
+    @actions = []
 
     instance_eval(&full_tf_block)
   end
@@ -128,6 +137,12 @@ class TerraformCompile
 
     raise ArgumentError("Terraform resources require a block with options.") unless attr_block
 
+    if TF_TOP_LEVELS.include?(tf_resource_type)
+      data = self.send( plural(tf_type) )[tf_resource_type]
+      data[resource_name] = TerraformAttributes.new(&attr_block).attr_kv_pairs
+      return
+    end
+
     resource_options = {}
 
     # eval the attributes in a different class.
@@ -143,7 +158,7 @@ class TerraformCompile
 
     # tf uses the singular, we use the plural. luckily: Ruby!
     TF_TOP_LEVELS.each do |tf_type|
-      data = self.send("#{tf_type}s".to_sym)
+      data = self.send( plural(tf_type).to_sym )
 
       result.merge!(tf_type => data) if data.size > 0
     end
