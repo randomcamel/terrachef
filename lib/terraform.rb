@@ -72,9 +72,11 @@ class TerraformAttributes
 end
 
 class TerraformCompile
-  # these are to avoid #instance_variable_get, which just looks gross. note that these rely on the naming
-  # convention of being "#{terraform_section_name}s".
-  attr_reader :providers, :resources, :outputs, :variables, :provisioners, :modules
+
+  TF_TOP_LEVELS = %w(provider resource variable output provisioner module)
+
+  # these are to avoid #instance_variable_get, which just looks gross.
+  TF_TOP_LEVELS.each { |sym| attr_reader :"#{sym}s" }
 
   def initialize(&full_tf_block)
     @providers = {}   # keyed by provider name.
@@ -145,7 +147,7 @@ class TerraformCompile
     result = {}
 
     # tf uses the singular, we use the plural. luckily: Ruby!
-    %w(provider resource variable output provisioner module).each do |tf_type|
+    TF_TOP_LEVELS.each do |tf_type|
       data = self.send("#{tf_type}s".to_sym)
 
       result.merge!(tf_type => data) if data.size > 0
