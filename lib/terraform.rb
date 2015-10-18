@@ -51,7 +51,8 @@ end
 end
 
 # ------------------------------------------------------------------------
-# this is only a separate class because its #method_missing behaves differently.
+# this is a separate class because its #method_missing behaves differently. we could do the same thing with
+# some fancy footwork in TerraformCompile, but only at the cost of clarity and testability.
 class TerraformAttributes
 
   attr_reader :attr_kv_pairs
@@ -65,6 +66,9 @@ class TerraformAttributes
     raise ArgumentError, "Must pass a block to TerraformAttributes" unless attributes_block
     @attr_kv_pairs = {}
     instance_eval(&attributes_block)
+    if attr_kv_pairs.size == 0
+      raise RuntimeError, "No attribute-value pairs found: must use the format 'my_attribute 'my_value'."
+    end
   end
 
   def method_missing(name, value)
