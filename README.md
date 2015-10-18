@@ -5,16 +5,9 @@ This should support anything Terraform supports; it doesn't rely on an explicit 
 
 _(This was a Hack Day project, so at the moment it works more in principle than in practice. The gaps are really about me learning to use Terraform and applying that knowledge here; the part where a Chef recipe gets turned into Terraform JSON is pretty solid.)_
 
+## Future Work
 
-## Future Ideas
-
-- [ ] Better/any `.tfstate` management.
-- [x] Allow user to specify `:plan` vs. `:apply` and maybe make that useful. <strike>(As a temporary hack, setting the `TERRACHEF_NOOP` environment variable with run `terraform plan` instead of `terraform apply`.)</strike>
-- [ ] Integration testing (e.g. actually running the `terraform_execute` resource).
-- [ ] Package up for consumption.
-- [x] Full and unit-tested top-level `provisioner` support.
-- [x] Full and unit-tested top-level `module` support.
-- [ ] More `terraform` subcommands as resource actions.
+Being tracked [here](https://github.com/randomcamel/terrachef/issues/1).
 
 ## Example
 
