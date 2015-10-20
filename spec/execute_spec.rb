@@ -16,10 +16,9 @@ describe "the Terrachef compiler" do
 
     it "runs a test recipe" do
       skip "broken"
-      ENV['TERRACHEF_NOOP'] = "yes"
-
-      expect_converge {
+      expect_recipe {
         terraform "my-terraform-block" do
+          action :plan
           provider "docker" do
             host "tcp://192.168.59.103:2376"
             cert_path "/Users/cdoherty/.boot2docker/certs/boot2docker-vm"
@@ -39,7 +38,7 @@ describe "the Terrachef compiler" do
             name "ubuntu:latest"
           end
         end
-      }
+      }.to be_truthy
     end
   end
 end
