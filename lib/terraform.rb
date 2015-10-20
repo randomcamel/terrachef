@@ -91,7 +91,7 @@ class TerraformCompile
   TF_TOP_LEVELS.each { |sym| attr_accessor self.plural(sym) }
   attr_accessor :actions
 
-  RESPONDABLES = TF_TOP_LEVELS + [:actions]
+  RESPONDABLES = TF_TOP_LEVELS
 
   def initialize(&full_tf_block)
     TF_TOP_LEVELS.each { |sym| self.send( "#{plural(sym)}=", {} ) }
@@ -176,7 +176,6 @@ def terraform(faux_resource_name, &full_tf_block)
 
   blob = parsed.to_tf_json
 
-require 'pry'; binding.pry
   parsed.actions.each do |tf_command|
     # create a terraform_execute resource with the JSON blob.
     terraform_execute faux_resource_name do
