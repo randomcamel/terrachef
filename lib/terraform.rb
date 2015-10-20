@@ -6,7 +6,6 @@ class Chef
 class Resource
 class TerraformExecute < Chef::Resource
   property :json_blob, String, required: true
-  # property state_file   # seems likely?
 
   resource_name :terraform_execute
 
@@ -92,6 +91,8 @@ class TerraformCompile
   TF_TOP_LEVELS.each { |sym| attr_accessor self.plural(sym) }
   attr_accessor :actions
 
+  RESPONDABLES = TF_TOP_LEVELS + [:actions]
+
   def initialize(&full_tf_block)
     TF_TOP_LEVELS.each { |sym| self.send( "#{plural(sym)}=", {} ) }
 
@@ -101,21 +102,26 @@ class TerraformCompile
   end
 
   # ---------------------
-  # Top-level Terraform directives that require non-generic handling.
+  # Top-level directives (mostly Terraform) that require non-generic handling.
     # has to map `tf_module` onto `module`.
     def tf_module(module_name, &options_block)
       @modules[module_name] = TerraformAttributes.new(&options_block).attr_kv_pairs
     end
 
-    # produces a different data structure
+    # produces a different data structure than the others.
     def atlas(atlas_user)
       @atlas = { :name => atlas_user }
+    end
+
+    def action(action)
+      # a resource would handle this for us, but.
+      self.actions = [action].flatten
     end
   # ---------------------
 
   # https://robots.thoughtbot.com/always-define-respond-to-missing-when-overriding
   def respond_to_missing?(method_name, include_private=false)
-    TF_TOP_LEVELS.include?(method_name) || super
+    RESPONDABLES.include?(method_name) || super
   end
 
   def method_missing(tf_resource_type, resource_name, &attr_block)
@@ -123,6 +129,8 @@ class TerraformCompile
     raise ArgumentError("Terraform resources require a block with options.") unless attr_block
 
     if TF_TOP_LEVELS.include?(tf_resource_type)
+      Chef::Log.info("Parsing Terraform resource #{tf_resource_type}")
+
       data = self.send( plural(tf_resource_type) )
       data[resource_name] = TerraformAttributes.new(&attr_block).attr_kv_pairs
       return
@@ -168,10 +176,11 @@ def terraform(faux_resource_name, &full_tf_block)
 
   blob = parsed.to_tf_json
 
-  parsed.actions.each do |tf_action|
+require 'pry'; binding.pry
+  parsed.actions.each do |tf_command|
     # create a terraform_execute resource with the JSON blob.
     terraform_execute faux_resource_name do
-      action tf_action
+      action tf_command
       json_blob blob
     end
   end
