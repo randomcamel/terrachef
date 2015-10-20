@@ -90,6 +90,7 @@ class TerraformCompile
 
   # these are to avoid #instance_variable_get, which just looks gross.
   TF_TOP_LEVELS.each { |sym| attr_accessor self.plural(sym) }
+  attr_accessor :actions
 
   def initialize(&full_tf_block)
     TF_TOP_LEVELS.each { |sym| self.send( "#{plural(sym)}=", {} ) }
@@ -160,13 +161,14 @@ end
 # resource or something, or tacking it onto the client run.
 def terraform(faux_resource_name, &full_tf_block)
 
+  raise ArgumentError, "Must pass a block to `terraform`" unless full_tf_block
+
   # compile the block into a JSON blob.
   parsed = TerraformCompile.new(&full_tf_block)
 
-  puts parsed.action.inspect
   blob = parsed.to_tf_json
 
-  parsed.action.each do |tf_action|
+  parsed.actions.each do |tf_action|
     # create a terraform_execute resource with the JSON blob.
     terraform_execute faux_resource_name do
       action tf_action
