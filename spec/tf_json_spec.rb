@@ -172,11 +172,35 @@ describe TerraformCompile do
       #   }
       # }
       it "processes nested blocks like aws_security_group" do
+        expected = {"resource"=>
+          {"aws_security_group"=>
+            {"allow_all"=> {
+              "name"=>"security-group-name",
+               "description"=>"Allow all inbound traffic",
+               "ingress"=> {
+                 "from_port"=>0,
+                 "to_port"=>0,
+                 "protocol"=>-1,
+                 "cidr_blocks"=>["0.0.0.0/0"]},
+               "egress"=> [
+                 {"from_port"=>0,
+                  "to_port"=>0,
+                  "protocol"=>-1,
+                  "cidr_blocks"=>["0.0.0.0/0"]},
+                 {"from_port"=>45,
+                  "to_port"=>true,
+                  "protocol"=>22,
+                  "cidr_blocks"=>["141.222.2.2/32", "fnord"]}
+                ]
+                }}}}
+
         actual = terraform_json_data do
           aws_security_group "allow_all" do
-            derp "Allow all inbound traffic"
+            name "security-group-name"
+            description "Allow all inbound traffic"
             ingress(from_port: 0, to_port: 0, protocol: -1, cidr_blocks: ["0.0.0.0/0"])
             egress(from_port: 0, to_port: 0, protocol: -1, cidr_blocks: ["0.0.0.0/0"])
+            egress(from_port: 45, to_port: true, protocol: 22, cidr_blocks: ["141.222.2.2/32", "fnord"])
           end
         end
         expect(actual).to be_truthy
