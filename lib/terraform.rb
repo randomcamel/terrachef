@@ -6,12 +6,16 @@ class Chef
 class Resource
 class TerraformExecute < Chef::Resource
   property :json_blob, String, required: true
+  property :refresh, [TrueClass, FalseClass], default: true
 
   resource_name :run_terraform
   default_action :plan
 
   [:plan, :apply].each do |tf_command|
     action tf_command do
+
+      tf_cli_command = "terraform #{tf_command} --refresh=#{refresh}"
+
       # may need to do some cwd footwork here, for usability.
       tmpdir = "/tmp"
       filename = name.gsub(/\s+/, '_') + ".tf.json"
@@ -23,7 +27,7 @@ class TerraformExecute < Chef::Resource
       # --------------------------------------------
 
       execute "Terraform block '#{name}'" do
-        command "terraform #{tf_command}"
+        command tf_cli_command
         cwd "/tmp"
       end
 
@@ -101,6 +105,7 @@ class TerraformCompile
 
   # these are to avoid #instance_variable_get, which just looks gross.
   TF_TOP_LEVELS.each { |sym| attr_accessor self.plural(sym) }
+
   attr_accessor :actions
 
   RESPONDABLES = TF_TOP_LEVELS
@@ -109,13 +114,15 @@ class TerraformCompile
     TF_TOP_LEVELS.each { |sym| self.send( "#{plural(sym)}=", {} ) }
 
     @actions = Chef::Resource::TerraformExecute.default_action
+    @refresh = true
 
     instance_eval(&full_tf_block)
   end
 
   # ---------------------
   # Top-level directives (mostly Terraform) that require non-generic handling.
-    # has to map `tf_module` onto `module`.
+
+    # this has to map `tf_module` onto `module`, which is a Ruby keyword.
     def tf_module(module_name, &options_block)
       @modules[module_name] = TerraformAttributes.new(&options_block).attr_kv_pairs
     end
@@ -125,8 +132,14 @@ class TerraformCompile
       @atlas = { :name => atlas_user }
     end
 
+    # these are required for being a faux-resource.
     def action(action)
       self.actions = [action].flatten
+    end
+
+    def refresh(do_refresh=nil)
+      @refresh = do_refresh if !do_refresh.nil?
+      @refresh
     end
   # ---------------------
 
@@ -190,6 +203,7 @@ def terraform(faux_resource_name, &full_tf_block)
   # create a run_terraform resource with the JSON blob.
   run_terraform faux_resource_name do
     action parsed.actions
+    refresh parsed.refresh
     json_blob blob
   end
 
