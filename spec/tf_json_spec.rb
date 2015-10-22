@@ -11,8 +11,10 @@ describe TerraformCompile do
   let(:basic_tf_data) { parse_file("basic.tf.json") }
   let(:my_tf_data)    { parse_file("recipe_output.tf.json") }
 
-  def terraform_json(&block)
-    JSON.parse(TerraformCompile.new(&block).to_tf_json)
+  def terraform_json_data(&block)
+    data = JSON.parse(TerraformCompile.new(&block).to_tf_json)
+    # require 'pry'; binding.pry
+    data
   end
 
   context "converting pseudo-Chef to Terraform data" do
@@ -35,7 +37,7 @@ describe TerraformCompile do
         # structure with a mix of string and hash keys, and JSON parsing only returns one or the other... by
         # exporting and re-importing to/from JSON, we stringify all our keys, and the test is closer to real-
         # life conditions.
-        actual = terraform_json do
+        actual = terraform_json_data do
           provider "docker" do
             host "tcp://192.168.59.103:2376"
             cert_path "/Users/cdoherty/.boot2docker/certs/boot2docker-vm"
@@ -60,7 +62,7 @@ describe TerraformCompile do
       end
 
       it "parses a TF recipe into TF's sample data" do
-        actual = terraform_json do
+        actual = terraform_json_data do
           provider "aws" do
             access_key "foo"
             secret_key "bar"
@@ -127,7 +129,35 @@ describe TerraformCompile do
         expect(actual).to eq(basic_tf_data)
       end
 
-      it "processes nested blocks like aws_security_group"
+      # resource "aws_security_group" "allow_all" {
+      #   name = "allow_all"
+      #   description = "Allow all inbound traffic"
+
+      #   ingress {
+      #       from_port = 0
+      #       to_port = 0
+      #       protocol = "-1"
+      #       cidr_blocks = ["0.0.0.0/0"]
+      #   }
+
+      #   egress {
+      #       from_port = 0
+      #       to_port = 0
+      #       protocol = "-1"
+      #       cidr_blocks = ["0.0.0.0/0"]
+      #   }
+      # }
+      it "processes nested blocks like aws_security_group" do
+        actual = terraform_json_data do
+          aws_security_group "allow_all" do
+            derp "Allow all inbound traffic"
+            ingress(from_port: 0, to_port: 0, protocol: -1, cidr_blocks: ["0.0.0.0/0"])
+            egress(from_port: 0, to_port: 0, protocol: -1, cidr_blocks: ["0.0.0.0/0"])
+          end
+        end
+        expect(actual).to be_truthy
+        pp actual; puts
+      end
     end
   end
 end
