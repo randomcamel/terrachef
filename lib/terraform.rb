@@ -10,40 +10,24 @@ class TerraformExecute < Chef::Resource
   resource_name :run_terraform
   default_action :plan
 
-  action :plan do
-    # ----- dunno how to factor this out... -----
-    # may need to do some cwd footwork here, for usability.
-    tmpdir = "/tmp"
-    filename = name.gsub(/\s+/, '_') + ".tf.json"
-    json_path = ::File.join(tmpdir, filename)
+  [:plan, :apply].each do |tf_command|
+    action tf_command do
+      # may need to do some cwd footwork here, for usability.
+      tmpdir = "/tmp"
+      filename = name.gsub(/\s+/, '_') + ".tf.json"
+      json_path = ::File.join(tmpdir, filename)
 
-    file json_path do
-      content json_blob
-    end
-    # --------------------------------------------
+      file json_path do
+        content json_blob
+      end
+      # --------------------------------------------
 
-    execute "Terraform block '#{name}'" do
-      command "terraform plan"
-      cwd "/tmp"
-    end
+      execute "Terraform block '#{name}'" do
+        command "terraform #{tf_command}"
+        cwd "/tmp"
+      end
 
-    log "Terraform files can be found in #{tmpdir}"
-  end
-
-  action :apply do
-
-    # ----- dunno how to factor this out... -----
-    # may need to do some cwd footwork here, for usability.
-    filename = name.gsub(/\s+/, '_') + ".tf.json"
-
-    file "/tmp/#{filename}" do
-      content json_blob
-    end
-    # --------------------------------------------
-
-    execute "Terraform block '#{name}'" do
-      command "terraform apply"
-      cwd "/tmp"
+      log "Terraform files can be found in #{tmpdir}"
     end
   end
 
