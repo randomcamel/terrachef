@@ -13,6 +13,18 @@ describe TerraformCompile do
       # make sure we're not being clever.
       expect(plural("hrorfs")).to eq(:hrorfss)
     end
+
+    it "answers #respond_to? correctly" do
+      tf = TerraformCompile.new( &(Proc.new {}) )
+
+      # these are currently the same, but in case we find a need to expand RESPONDABLES but not TF_TOP_LEVELS,
+      # take their set union.
+      respondables = TerraformCompile::TF_TOP_LEVELS | TerraformCompile::RESPONDABLES
+
+      respondables.each do |top_level|
+        expect(tf.respond_to?(top_level)).to be_truthy
+      end
+    end
   end
 end
 
