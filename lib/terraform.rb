@@ -7,7 +7,7 @@ class Resource
 class TerraformExecute < Chef::Resource
   property :json_blob, String, required: true
 
-  resource_name :terraform_execute
+  resource_name :run_terraform
   default_action :plan
 
   action :plan do
@@ -27,7 +27,7 @@ class TerraformExecute < Chef::Resource
       cwd "/tmp"
     end
 
-    log "Terraform files can be found in /tmp"
+    log "Terraform files can be found in #{tmpdir}"
   end
 
   action :apply do
@@ -77,6 +77,9 @@ class TerraformAttributes
 end
 
 # ------------------------------------------------------------------------
+
+# From a high level, it looks like this could be a real Chef::Resource, since we're faking properties and
+# actions, and creating inner resources. That's true only if we can safely have our own #method_missing.
 class TerraformCompile
 
   TF_TOP_LEVELS = [:provider, :resource, :variable, :output, :provisioner, :module]
@@ -115,7 +118,6 @@ class TerraformCompile
     end
 
     def action(action)
-      # a resource would handle this for us, but.
       self.actions = [action].flatten
     end
   # ---------------------
@@ -179,7 +181,7 @@ def terraform(faux_resource_name, &full_tf_block)
 
   parsed.actions.each do |tf_command|
     # create a terraform_execute resource with the JSON blob.
-    terraform_execute faux_resource_name do
+    run_terraform faux_resource_name do
       action tf_command
       json_blob blob
     end
