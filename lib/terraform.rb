@@ -46,6 +46,10 @@ class TerraformExecute < Chef::Resource
       cwd "/tmp"
     end
   end
+
+  action :noop do
+    log "noop noop noop noop"
+  end
 end
 end
 end
@@ -179,12 +183,10 @@ def terraform(faux_resource_name, &full_tf_block)
 
   blob = parsed.to_tf_json
 
-  parsed.actions.each do |tf_command|
-    # create a terraform_execute resource with the JSON blob.
-    run_terraform faux_resource_name do
-      action tf_command
-      json_blob blob
-    end
+  # create a run_terraform resource with the JSON blob.
+  run_terraform faux_resource_name do
+    action parsed.actions
+    json_blob blob
   end
 
   # that's it.
