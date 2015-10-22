@@ -17,17 +17,41 @@ describe TerraformCompile do
     data
   end
 
+  def terraform_attributes_data(&block)
+    TerraformAttributes.new(&block).attr_kv_pairs
+  end
+
   context "converting pseudo-Chef to Terraform data" do
     context "attributes" do
       it "converts an attributes block to a hash" do
         expected = { :foo => 23, :blargh => "a string" }
-        actual = TerraformAttributes.new do
-          foo 42
+        actual = terraform_attributes_data do
           blargh "a string"
           foo 23
-        end.attr_kv_pairs
+        end
 
         expect(actual).to eq(expected)
+      end
+
+      it "turns repeated complex attributes into arrays" do
+        expected = {
+          :derp=>"Allow all inbound traffic",
+          :ingress=>
+            {:from_port=>0, :to_port=>0, :protocol=>-1, :cidr_blocks=>["0.0.0.0/0"]},
+          :egress=> [
+            {:from_port=>0, :to_port=>0, :protocol=>-1, :cidr_blocks=>["0.0.0.0/0"]},
+            {:cheese=>45,
+              :lackadaisical=>true,
+              :protocol=>22,
+              :cidr_blocks=>["141.222.2.2/32", "fnord"]}]}
+        actual = terraform_attributes_data do
+          description "Allow all inbound traffic"
+          ingress(from_port: 0, to_port: 0, protocol: -1, cidr_blocks: ["0.0.0.0/0"])
+          egress(from_port: 0, to_port: 0, protocol: -1, cidr_blocks: ["0.0.0.0/0"])
+          egress(cheese: 45, lackadaisical: true, protocol: 22, cidr_blocks: ["141.222.2.2/32", "fnord"])
+        end
+
+        pp actual; puts
       end
     end
 
@@ -156,7 +180,7 @@ describe TerraformCompile do
           end
         end
         expect(actual).to be_truthy
-        pp actual; puts
+        # pp actual; puts
       end
     end
   end

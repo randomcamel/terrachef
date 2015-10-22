@@ -60,7 +60,27 @@ class TerraformAttributes
   end
 
   def method_missing(name, value)
-    @attr_kv_pairs.merge!({ name => value })
+    new_kv = { name => value }
+
+    # gracefully handle repeated attributes.
+    if attr_kv_pairs.has_key?(name)
+
+      # is it already an Array?
+      if attr_kv_pairs[name].class == Array
+        attr_kv_pairs[name] << value
+      # nope, this is the first repetition.
+      else
+        attr_kv_pairs[name] = [attr_kv_pairs[name], value]
+      end
+
+    else
+      # just treat it like a single k-v pair.
+      @attr_kv_pairs.merge!(new_kv)
+    end
+  end
+
+  def respond_to_missing?(method_name, include_private=false)
+    true
   end
 end
 
