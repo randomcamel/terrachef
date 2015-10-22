@@ -8,6 +8,7 @@ class TerraformExecute < Chef::Resource
   property :json_blob, String, required: true
 
   resource_name :terraform_execute
+  default_action :plan
 
   action :plan do
     # ----- dunno how to factor this out... -----
@@ -96,7 +97,7 @@ class TerraformCompile
   def initialize(&full_tf_block)
     TF_TOP_LEVELS.each { |sym| self.send( "#{plural(sym)}=", {} ) }
 
-    @actions = []
+    @actions = Chef::Resource::TerraformExecute.default_action
 
     instance_eval(&full_tf_block)
   end

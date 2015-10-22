@@ -39,5 +39,7 @@ describe "the Terrachef compiler" do
         end
       }.to be_truthy
     end
+
+    it "correctly fills in the default action when no action is given"
   end
 end
