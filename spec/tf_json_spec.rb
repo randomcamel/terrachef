@@ -122,6 +122,8 @@ describe TerraformCompile do
 
         expect(actual).to eq(basic_tf_data)
       end
+
+      it "processes nested blocks like aws_security_group"
     end
   end
 end

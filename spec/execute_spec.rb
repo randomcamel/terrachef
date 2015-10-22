@@ -15,7 +15,6 @@ describe "the Terrachef compiler" do
     end
 
     it "runs a test recipe" do
-      # skip "broken"
       expect_recipe {
         terraform "my-terraform-block" do
           action :plan
