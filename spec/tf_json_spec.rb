@@ -11,6 +11,10 @@ describe TerraformCompile do
   let(:basic_tf_data) { parse_file("basic.tf.json") }
   let(:my_tf_data)    { parse_file("recipe_output.tf.json") }
 
+  def terraform_json(&block)
+    JSON.parse(TerraformCompile.new(&block).to_tf_json)
+  end
+
   context "converting pseudo-Chef to Terraform data" do
     context "attributes" do
       it "converts an attributes block to a hash" do
@@ -31,7 +35,7 @@ describe TerraformCompile do
         # structure with a mix of string and hash keys, and JSON parsing only returns one or the other... by
         # exporting and re-importing to/from JSON, we stringify all our keys, and the test is closer to real-
         # life conditions.
-        actual = JSON.parse(TerraformCompile.new do
+        actual = terraform_json do
           provider "docker" do
             host "tcp://192.168.59.103:2376"
             cert_path "/Users/cdoherty/.boot2docker/certs/boot2docker-vm"
@@ -50,13 +54,13 @@ describe TerraformCompile do
           docker_image "ubuntu" do
             name "ubuntu:latest"
           end
-        end.to_tf_json)
+        end
 
         expect(actual).to eq(my_tf_data)
       end
 
       it "parses a TF recipe into TF's sample data" do
-        actual = JSON.parse(TerraformCompile.new do
+        actual = terraform_json do
           provider "aws" do
             access_key "foo"
             secret_key "bar"
@@ -118,7 +122,7 @@ describe TerraformCompile do
           end
 
           atlas "chef/merp"
-        end.to_tf_json)
+        end
 
         expect(actual).to eq(basic_tf_data)
       end
