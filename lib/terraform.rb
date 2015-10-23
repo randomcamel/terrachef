@@ -1,30 +1,42 @@
 require 'json'
 
 require 'chef'
+require 'cheffish'
 
 class Chef
 class Resource
 class TerraformExecute < Chef::Resource
   property :json_blob, String, required: true
-  property :refresh, [TrueClass, FalseClass], default: true
+  property :refresh, [TrueClass, FalseClass], default: true  # default to false?
+
+  property :tmpdir, String, default: "/tmp"
 
   resource_name :run_terraform
-  default_action :plan
+  default_action :graph
+
+  def json_file_path
+    filename = name.gsub(/\s+/, '_') + ".tf.json"
+    json_path = ::File.join(tmpdir, filename)
+  end
+
+  action :graph do
+    file json_file_path do
+      content json_blob
+    end
+
+    execute "Terraform block '#{name}'" do
+      command "terraform graph"
+      cwd "/tmp"
+    end
+  end
 
   [:plan, :apply].each do |tf_command|
     action tf_command do
-
       tf_cli_command = "terraform #{tf_command} --refresh=#{refresh}"
 
-      # may need to do some cwd footwork here, for usability.
-      tmpdir = "/tmp"
-      filename = name.gsub(/\s+/, '_') + ".tf.json"
-      json_path = ::File.join(tmpdir, filename)
-
-      file json_path do
+      file json_file_path do
         content json_blob
       end
-      # --------------------------------------------
 
       execute "Terraform block '#{name}'" do
         command tf_cli_command
