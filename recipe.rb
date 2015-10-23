@@ -1,3 +1,5 @@
+#!/usr/bin/env chef-client -z
+
 require_relative "lib/terrachef"
 
 log "before Terraform"
