@@ -8,6 +8,13 @@ describe "the Terrachef compiler" do
   end
 
   context "TerraformCompile" do
+
+    before(:each) {
+      unless ENV['AWS_ACCESS_KEY_ID'] && ENV['AWS_SECRET_ACCESS_KEY']
+        fail "Terraform doesn't have a test mode, so you'll need to set AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY"
+      end
+    }
+
     it "requires an attributes block" do
       expect_converge {
         terraform "blort"
@@ -26,8 +33,8 @@ describe "the Terrachef compiler" do
           end
 
           provider "aws" do
-            aws_secret "some-secret"
-            aws_key    "some-key"
+            access_key  ENV['AWS_ACCESS_KEY_ID']
+            secret_key  ENV['AWS_SECRET_ACCESS_KEY']
           end
 
           docker_container "foo" do
@@ -39,13 +46,13 @@ describe "the Terrachef compiler" do
             name "ubuntu:latest"
           end
 
-          # aws_security_group "fake-group" do
-          #   name "wtf"
-          #   description "Allow all inbound traffic"
-          #   ingress(from_port: 0, to_port: 0, protocol: -1, cidr_blocks: ["0.0.0.0/0"])
-          #   egress(from_port: 0, to_port: 0, protocol: -1, cidr_blocks: ["0.0.0.0/0"])
-          #   egress(from_port: 45, to_port: true, protocol: 22, cidr_blocks: ["141.222.2.2/32", "fnord"])
-          # end
+          aws_security_group "fake-group" do
+            name "wtf"
+            description "Allow all inbound traffic"
+            ingress(from_port: 0, to_port: 0, protocol: -1, cidr_blocks: ["0.0.0.0/0"])
+            egress(from_port: 0, to_port: 0, protocol: -1, cidr_blocks: ["0.0.0.0/0"])
+            egress(from_port: 45, to_port: true, protocol: 22, cidr_blocks: ["141.222.2.2/32", "fnord"])
+          end
         end
       }.to be_truthy
     end
