@@ -14,15 +14,20 @@ class TerraformExecute < Chef::Resource
   resource_name :run_terraform
   default_action :graph
 
-  def json_file_path
-    filename = name.gsub(/\s+/, '_') + ".tf.json"
-    json_path = ::File.join(tmpdir, filename)
+  declare_action_class.class_eval do
+    def write_json_file
+      filename = name.gsub(/\s+/, '_') + ".tf.json"
+      json_path = ::File.join(tmpdir, filename)
+
+      file json_path do
+        content json_blob
+      end
+    end
   end
 
   action :graph do
-    file json_file_path do
-      content json_blob
-    end
+
+    write_json_file
 
     execute "Terraform block '#{name}'" do
       command "terraform graph"
@@ -34,9 +39,7 @@ class TerraformExecute < Chef::Resource
     action tf_command do
       tf_cli_command = "terraform #{tf_command} --refresh=#{refresh}"
 
-      file json_file_path do
-        content json_blob
-      end
+      write_json_file
 
       execute "Terraform block '#{name}'" do
         command tf_cli_command
