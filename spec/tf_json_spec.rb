@@ -13,7 +13,6 @@ describe TerraformCompile do
 
   def terraform_json_data(&block)
     data = JSON.parse(TerraformCompile.new(&block).to_tf_json)
-    # require 'pry'; binding.pry
     data
   end
 
@@ -50,8 +49,6 @@ describe TerraformCompile do
           egress(from_port: 0, to_port: 0, protocol: -1, cidr_blocks: ["0.0.0.0/0"])
           egress(cheese: 45, lackadaisical: true, protocol: 22, cidr_blocks: ["141.222.2.2/32", "fnord"])
         end
-
-        pp actual; puts
       end
     end
 
@@ -203,8 +200,7 @@ describe TerraformCompile do
             egress(from_port: 45, to_port: true, protocol: 22, cidr_blocks: ["141.222.2.2/32", "fnord"])
           end
         end
-        expect(actual).to be_truthy
-        # pp actual; puts
+        expect(actual).to eq(expected)
       end
     end
   end
