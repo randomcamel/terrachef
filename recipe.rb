@@ -7,7 +7,7 @@ log "before Terraform"
 terraform "my-terraform-block" do
 
   refresh false
-
+  # action :plan
   provider "docker" do
     host "tcp://192.168.59.103:2376"
     cert_path "/Users/cdoherty/.boot2docker/certs/boot2docker-vm"
