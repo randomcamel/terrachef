@@ -286,5 +286,5 @@ def terraform(faux_resource_name, &full_tf_block)
     json_blob blob
   end
 
-  # that's it.
+  # that's it. the Chef CCR will do the rest.
 end
