@@ -7,13 +7,14 @@ class Chef
 class Resource
 class TerraformExecute < Chef::Resource
   property :json_blob, String, required: true
-  property :refresh, [TrueClass, FalseClass], default: true  # default to false?
+  property :refresh, [TrueClass, FalseClass], default: false
 
   property :tmpdir, String, default: "/tmp"
 
   resource_name :run_terraform
   default_action :graph
 
+  # magic invocation to be able to use resources inside helper functions.
   declare_action_class.class_eval do
     def write_json_file
       filename = name.gsub(/\s+/, '_') + ".tf.json"
@@ -31,7 +32,7 @@ class TerraformExecute < Chef::Resource
 
     execute "Terraform block '#{name}'" do
       command "terraform graph"
-      cwd "/tmp"
+      cwd tmpdir
     end
   end
 
@@ -129,7 +130,7 @@ class TerraformCompile
     TF_TOP_LEVELS.each { |sym| self.send( "#{plural(sym)}=", {} ) }
 
     @actions = Chef::Resource::TerraformExecute.default_action
-    @refresh = true
+    @refresh = Chef::Resource::TerraformExecute.properties[:refresh].default
 
     instance_eval(&full_tf_block)
   end
