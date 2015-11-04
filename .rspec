@@ -1,3 +1,5 @@
 --color
 -fd
-
+--require spec_helper
+-I files/lib
+-I files/spec
