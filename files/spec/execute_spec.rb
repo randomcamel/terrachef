@@ -23,11 +23,13 @@ describe "the Terrachef compiler" do
         }.to raise_error(ArgumentError, "Must pass a block to `terraform`")
       end
 
-      it "runs a test recipe with :plan" do
+      it "runs a test recipe with :graph" do
+        actual = ::File.open("files/spec/test_data/graph-output.dot") { |f| f.read }
+
         expect_recipe {
 
           terraform "my-terraform-block" do
-            action :plan
+            action :graph
             refresh false
 
             provider "docker" do
@@ -58,6 +60,8 @@ describe "the Terrachef compiler" do
             end
           end
         }.to be_truthy
+
+        # could check the .tfstate directly from the data bag.
       end
 
       it "correctly fills in the default action when no action is given"

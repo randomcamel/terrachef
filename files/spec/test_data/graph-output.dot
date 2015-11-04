@@ -1,0 +1,14 @@
+digraph {
+  compound = "true"
+  newrank = "true"
+  subgraph "root" {
+    "[root] aws_security_group.fake-group" [label = "aws_security_group.fake-group", shape = "box"]
+    "[root] docker_container.foo" [label = "docker_container.foo", shape = "box"]
+    "[root] docker_image.ubuntu" [label = "docker_image.ubuntu", shape = "box"]
+    "[root] provider.aws" [label = "provider.aws", shape = "diamond"]
+    "[root] provider.docker" [label = "provider.docker", shape = "diamond"]
+    "[root] aws_security_group.fake-group" -> "[root] provider.aws"
+    "[root] docker_container.foo" -> "[root] provider.docker"
+    "[root] docker_image.ubuntu" -> "[root] provider.docker"
+  }
+}
