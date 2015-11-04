@@ -10,6 +10,7 @@ describe "the Terrachef compiler" do
 
   context "TerraformCompile" do
 
+when_the_chef_12_server "exists", organization: 'some-org', server_scope: :context, port: 8900..9000 do
     before(:each) {
       unless ENV['AWS_ACCESS_KEY_ID'] && ENV['AWS_SECRET_ACCESS_KEY']
         fail "Terraform doesn't have a test mode, so you'll need to set AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY"
@@ -23,9 +24,7 @@ describe "the Terrachef compiler" do
     end
 
     it "runs a test recipe with :plan" do
-      skip "fails because with_chef_local_server does not do the needful"
       expect_recipe {
-        with_chef_local_server(chef_repo_path: "/tmp")
 
         terraform "my-terraform-block" do
           action :plan
@@ -63,4 +62,5 @@ describe "the Terrachef compiler" do
 
     it "correctly fills in the default action when no action is given"
   end
+end
 end
