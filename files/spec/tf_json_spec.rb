@@ -5,7 +5,7 @@ require 'spec_helper'
 describe TerraformCompile do
 
   def parse_file(test_filename)
-    JSON.parse(File.open("spec/test_data/#{test_filename}").read)
+    JSON.parse(File.open("files/spec/test_data/#{test_filename}").read)
   end
 
   let(:basic_tf_data) { parse_file("basic.tf.json") }
