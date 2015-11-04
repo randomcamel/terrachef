@@ -3,42 +3,32 @@ lib = File.expand_path('../lib', __FILE__)
 $LOAD_PATH.unshift(lib) unless $LOAD_PATH.include?(lib)
 require 'terrachef/version'
 
-Gem::Specification.new do |spec|
-  spec.name          = "terrachef"
-  spec.version       = Terrachef::VERSION
-  spec.authors       = ["Chris Doherty"]
-  spec.email         = ["chris@randomcamel.net"]
+Gem::Specification.new do |s|
+  s.name          = project
+  s.version       = Terrachef::VERSION
+  s.authors       = ["Chris Doherty"]
+  s.email         = ["chris@randomcamel.net"]
 
-  spec.summary       = %q{TODO: Write a short summary, because Rubygems requires one.}
-  spec.description   = %q{TODO: Write a longer description or delete this line.}
-  spec.homepage      = "TODO: Put your gem's website or public repo URL here."
-  spec.license       = "MIT"
-  # s.name = project
-  # s.version = ChefCompat::VERSION
-  # s.platform = Gem::Platform::RUBY
-  # s.summary = 'Bring some new features of Chef 12.5 to previous 12.X releases'
-  # s.description = s.summary
+  s.summary       = "Use Chef DSL to write Terraform configurations."
+  s.description   = s.summary
+  s.homepage      = "https://github.com/randomcamel/terrachef"
+  s.license       = "Apache 2.0"
 
-  # Prevent pushing this gem to RubyGems.org by setting 'allowed_push_host', or
-  # delete this section to allow pushing this gem to any host.
-  if spec.respond_to?(:metadata)
-    spec.metadata['allowed_push_host'] = "TODO: Set to 'http://mygemserver.com'"
-  else
-    raise "RubyGems 2.0 or newer is required to protect against public gem pushes."
-  end
+  s.add_dependency "chef", "~> 12.5"
+  s.add_dependency "cheffish"
+  s.add_dependency "chefs"
 
-  spec.files         = `git ls-files -z`.split("\x0").reject { |f| f.match(%r{^(test|spec|features)/}) }
-  spec.bindir        = "exe"
-  spec.executables   = spec.files.grep(%r{^exe/}) { |f| File.basename(f) }
-  spec.require_paths = ["lib"]
+  s.add_development_dependency "bundler", "~> 1.10"
+  s.add_development_dependency "rake", "~> 10.0"
+  s.add_development_dependency 'rspec'
+  s.add_development_dependency 'cheffish'
+  # s.add_development_dependency 'stove'
+  s.add_development_dependency 'chef'
+  s.add_development_dependency "pry-byebug"
+  s.add_development_dependency "pry-stack_explorer"
 
-  spec.add_dependency "chef", "~> 12.5"
-  spec.add_dependency "cheffish"
-  spec.add_dependency "chefspec"
-
-  spec.add_development_dependency "bundler", "~> 1.10"
-  spec.add_development_dependency "rake", "~> 10.0"
-  spec.add_development_dependency "pry-byebug"
-  spec.add_development_dependency "pry-stack_explorer"
-
+  s.bindir       = 'bin'
+  s.executables  = []
+  s.require_path = 'files/lib'
+  s.files = %w(LICENSE README.md CHANGELOG.md Gemfile Rakefile) + Dir.glob('{files/lib,spec}/**/*', File::FNM_DOTMATCH).reject {|f| File.directory?(f)}
 end
