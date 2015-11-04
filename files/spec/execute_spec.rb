@@ -1,4 +1,5 @@
 require 'spec_helper'
+require 'cheffish/recipe_dsl'
 
 describe "the Terrachef compiler" do
   extend Cheffish::RSpec::ChefRunSupport
@@ -22,7 +23,12 @@ describe "the Terrachef compiler" do
     end
 
     it "runs a test recipe with :plan" do
+      skip "fails because with_chef_local_server does not do the needful"
       expect_recipe {
+        with_chef_local_server(chef_repo_path: "/tmp") do
+          # require 'pry'; binding.pry
+          puts :derp
+        end
         terraform "my-terraform-block" do
           action :plan
           refresh false

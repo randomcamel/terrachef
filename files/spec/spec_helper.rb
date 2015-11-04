@@ -16,3 +16,6 @@ RSpec.configure do |config|
     mocks.verify_partial_doubles = true
   end
 end
+
+Chef::Log.init("/tmp/rspec-chef.log")
+Chef::Log.level = :debug
