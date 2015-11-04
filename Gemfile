@@ -1,8 +1,8 @@
-source "https://rubygems.org"
+source 'https://rubygems.org'
 
-gem "chef", "~> 12.5"
-gem "cheffish"
-gem "chefspec"
+gemspec
 
-gem "pry-byebug"
-gem "pry-stack_explorer"
+gem 'stove', '3.2.5'
+if ENV['GEMFILE_MOD']
+  instance_eval(ENV['GEMFILE_MOD'])
+end
