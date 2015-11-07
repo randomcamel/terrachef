@@ -22,6 +22,8 @@ class TerraformExecute < Chef::Resource
 
   TFSTATE_FILENAME = "terraform.tfstate"
 
+  # add a CCR handler to delete the temporary tfstate directory.
+
   # magic invocation to be able to use resources inside helper functions.
   declare_action_class.class_eval do
     def write_json_file
@@ -121,51 +123,7 @@ end
 end
 end
 
-# ------------------------------------------------------------------------
-# this is a separate class because its #method_missing behaves differently. we could do the same thing with
-# some fancy footwork in TerraformCompile, but only at the cost of clarity and testability.
-class TerraformAttributes
 
-  attr_reader :attr_kv_pairs
-
-  # given a block of stuff like this:
-  # 
-  # an_attribute "some value"
-  # 
-  # return a hash of { :an_attribute => "some value" }
-  def initialize(&attributes_block)
-    raise ArgumentError, "Must pass a block to TerraformAttributes" unless attributes_block
-    @attr_kv_pairs = {}
-    instance_eval(&attributes_block)
-    if attr_kv_pairs.size == 0
-      raise RuntimeError, "No attribute-value pairs found: must use the format 'my_attribute 'my_value'."
-    end
-  end
-
-  def method_missing(name, value)
-    new_kv = { name => value }
-
-    # gracefully handle repeated attributes.
-    if attr_kv_pairs.has_key?(name)
-
-      # is it already an Array?
-      if attr_kv_pairs[name].class == Array
-        attr_kv_pairs[name] << value
-      # nope, this is the first repetition.
-      else
-        attr_kv_pairs[name] = [attr_kv_pairs[name], value]
-      end
-
-    else
-      # just treat it like a single k-v pair.
-      @attr_kv_pairs.merge!(new_kv)
-    end
-  end
-
-  def respond_to_missing?(method_name, include_private=false)
-    true
-  end
-end
 
 # ------------------------------------------------------------------------
 
@@ -203,7 +161,7 @@ class TerraformCompile
 
     # this has to map `tf_module` onto `module`, which is a Ruby keyword.
     def tf_module(module_name, &options_block)
-      @modules[module_name] = TerraformAttributes.new(&options_block).attr_kv_pairs
+      @modules[module_name] = AttributePairs.new(&options_block).attr_kv_pairs
     end
 
     # produces a different data structure than the others.
@@ -235,14 +193,14 @@ class TerraformCompile
       Chef::Log.info("Parsing Terraform resource #{tf_resource_type}")
 
       data = self.send( plural(tf_resource_type) )
-      data[resource_name] = TerraformAttributes.new(&attr_block).attr_kv_pairs
+      data[resource_name] = AttributePairs.new(&attr_block).attr_kv_pairs
       return
     end
 
     resource_options = {}
 
     # eval the attributes in a different class.
-    attr_kv_pairs = TerraformAttributes.new(&attr_block).attr_kv_pairs
+    attr_kv_pairs = AttributePairs.new(&attr_block).attr_kv_pairs
     resource_options.merge!(attr_kv_pairs)
 
     (@resources[tf_resource_type.to_s] ||= {})[resource_name] = resource_options

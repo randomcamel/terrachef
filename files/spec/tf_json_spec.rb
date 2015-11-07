@@ -17,7 +17,7 @@ describe TerraformCompile do
   end
 
   def terraform_attributes_data(&block)
-    TerraformAttributes.new(&block).attr_kv_pairs
+    AttributePairs.new(&block).attr_kv_pairs
   end
 
   context "converting pseudo-Chef to Terraform data" do
