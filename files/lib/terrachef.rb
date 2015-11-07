@@ -4,3 +4,4 @@ require "terrachef/version"
 $: << File.dirname(__FILE__)
 require 'terraform'
 require 'attribute_pairs'
+require 'terraform_compile'
