@@ -1,7 +1,9 @@
+require 'terrachef/cheffified_tool_compiler'
+
 # ------------------------------------------------------------------------
 # From a high level, it looks like this could be a real Chef::Resource, since we're faking properties and
 # actions, and creating inner resources. That's true only if we can safely have our own #method_missing.
-class TerraformCompile
+class TerraformCompile < Terrachef::CheffifiedToolCompiler
 
   TF_TOP_LEVELS = [:provider, :resource, :variable, :output, :provisioner, :module]
 
@@ -17,7 +19,11 @@ class TerraformCompile
 
   attr_accessor :actions
 
-  RESPONDABLES = TF_TOP_LEVELS
+  def self.respondables
+    TF_TOP_LEVELS
+  end
+
+  def respondables; self.class.respondables; end
 
   def initialize(&full_tf_block)
     TF_TOP_LEVELS.each { |sym| self.send( "#{plural(sym)}=", {} ) }
@@ -54,7 +60,7 @@ class TerraformCompile
 
   # https://robots.thoughtbot.com/always-define-respond-to-missing-when-overriding
   def respond_to_missing?(method_name, include_private=false)
-    RESPONDABLES.include?(method_name) || super
+    self.respondables.include?(method_name) || super
   end
 
   def method_missing(tf_resource_type, resource_name, &attr_block)
