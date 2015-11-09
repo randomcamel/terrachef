@@ -23,8 +23,6 @@ class TerraformCompile < Terrachef::CheffifiedToolCompiler
     TF_TOP_LEVELS
   end
 
-  def respondables; self.class.respondables; end
-
   def initialize(&full_tf_block)
     TF_TOP_LEVELS.each { |sym| self.send( "#{plural(sym)}=", {} ) }
 
