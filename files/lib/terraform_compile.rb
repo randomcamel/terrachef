@@ -12,20 +12,15 @@ class TerraformCompile < Terrachef::CheffifiedToolCompiler
   def self.plural(singular)
     "#{singular}s".to_sym
   end
+
   def plural(singular)
     self.class.plural(singular)
   end
 
-  # these are to avoid #instance_variable_get, which just looks gross.
-  top_levels.each { |sym| attr_accessor self.plural(sym) }
-
   attr_accessor :actions
 
-  def self.respondables
-    self.top_levels
-  end
-
   def initialize(&full_tf_block)
+    super
     self.class.top_levels.each { |sym| self.send( "#{plural(sym)}=", {} ) }
 
     @actions = Chef::Resource::TerraformExecute.default_action
