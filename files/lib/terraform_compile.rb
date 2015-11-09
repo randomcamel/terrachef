@@ -5,7 +5,9 @@ require 'terrachef/cheffified_tool_compiler'
 # actions, and creating inner resources. That's true only if we can safely have our own #method_missing.
 class TerraformCompile < Terrachef::CheffifiedToolCompiler
 
-  TF_TOP_LEVELS = [:provider, :resource, :variable, :output, :provisioner, :module]
+  def self.top_levels
+    [:provider, :resource, :variable, :output, :provisioner, :module]
+  end
 
   def self.plural(singular)
     "#{singular}s".to_sym
@@ -15,16 +17,16 @@ class TerraformCompile < Terrachef::CheffifiedToolCompiler
   end
 
   # these are to avoid #instance_variable_get, which just looks gross.
-  TF_TOP_LEVELS.each { |sym| attr_accessor self.plural(sym) }
+  top_levels.each { |sym| attr_accessor self.plural(sym) }
 
   attr_accessor :actions
 
   def self.respondables
-    TF_TOP_LEVELS
+    self.top_levels
   end
 
   def initialize(&full_tf_block)
-    TF_TOP_LEVELS.each { |sym| self.send( "#{plural(sym)}=", {} ) }
+    self.class.top_levels.each { |sym| self.send( "#{plural(sym)}=", {} ) }
 
     @actions = Chef::Resource::TerraformExecute.default_action
     @refresh = Chef::Resource::TerraformExecute.properties[:refresh].default
@@ -65,7 +67,7 @@ class TerraformCompile < Terrachef::CheffifiedToolCompiler
 
     raise ArgumentError("Terraform resources require a block with options.") unless attr_block
 
-    if TF_TOP_LEVELS.include?(tf_resource_type)
+    if self.class.top_levels.include?(tf_resource_type)
       Chef::Log.info("Parsing Terraform resource #{tf_resource_type}")
 
       data = self.send( plural(tf_resource_type) )
@@ -86,7 +88,7 @@ class TerraformCompile < Terrachef::CheffifiedToolCompiler
     result = {}
 
     # tf uses the singular, we use the plural. luckily: Ruby!
-    TF_TOP_LEVELS.each do |tf_type|
+    self.class.top_levels.each do |tf_type|
       data = self.send( plural(tf_type).to_sym )
 
       result.merge!(tf_type => data) if data.size > 0

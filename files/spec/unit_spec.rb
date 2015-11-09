@@ -18,8 +18,8 @@ describe TerraformCompile do
       tf = TerraformCompile.new( &(Proc.new {}) )
 
       # these are currently the same, but in case we find a need to expand @respondables but not
-      # TF_TOP_LEVELS, take their set union.
-      respondables = TerraformCompile::TF_TOP_LEVELS | TerraformCompile.respondables
+      # @top_levels, take their set union.
+      respondables = TerraformCompile.top_levels | TerraformCompile.respondables
 
       respondables.each do |top_level|
         expect(tf.respond_to?(top_level)).to be_truthy
