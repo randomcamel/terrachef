@@ -3,7 +3,7 @@ Write almost any Terraform configuration using code indistinguishable from Chef 
 
 This should support anything Terraform supports; it doesn't rely on an explicit list of Terraform functionality, so when Terraform adds something, you can use it via Terrachef.
 
-_(This was a Hack Day project, so at the moment it works more in principle than in practice. The gaps are really about me learning to use Terraform and applying that knowledge here; the part where a Chef recipe gets turned into Terraform JSON is pretty solid.)_
+_(This was a fun Hack Day project, so while it works, it has gaps due to lack of real-world use. The gaps are really about me learning to use Terraform and applying that knowledge here; the part where a Chef recipe gets turned into Terraform JSON is pretty solid. If you want it to be better, please [let me know](https://github.com/randomcamel/terrachef/issues)._
 
 ## Future Work
 
@@ -11,7 +11,7 @@ Being tracked [here](https://github.com/randomcamel/terrachef/issues/1).
 
 ## Example
 
-Terraform has its own DSL, but if you already know Chef, you should be able to use Chef!
+Terraform has its own DSL, but if you already know Chef, you should be able to use Chef! Or something that looks and feels like Chef.
 
 **WARNING: You can use the normal Terraform directives everywhere, _EXCEPT_ for `module`: because `module` is a Ruby keyword, we use `tf_module` instead.**
 
@@ -85,7 +85,7 @@ Running handlers complete
 Chef Client finished, 4/5 resources updated in 04 seconds
 ```
 
-You can use Terraform variables, and just like in Terraform, to ensure ordering, you must add `depends_on` yourself. Pretty much anything Terraform can do can be expressed with Terrachef: everything is passed straight through to Terraform. (If it's not, please file a bug.)
+You can use Terraform variables, and just like in Terraform, to ensure ordering, you must add `depends_on` yourself. Pretty much anything Terraform can do can be expressed with Terrachef: everything is passed straight through to Terraform. (If it's not, please file a bug.) This is one of Terraform's long examples, converted to Terrachef.
 
 ```ruby  
 provider "aws" do
